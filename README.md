@@ -12,18 +12,11 @@ The flake currently exposes outputs for:
 - `x86_64-linux`
 - `aarch64-darwin`
 
-Available outputs:
+Quick run:
 
 ```sh
-nix build .#packages.x86_64-linux.default
-nix develop .#devShells.x86_64-linux.default
-```
-
-On a matching host, the shorter forms should also work:
-
-```sh
-nix build
-nix develop
+nix build github:pgattic/verus-flake
+nix develop github:pgattic/verus-flake
 ```
 
 The installed package provides:
