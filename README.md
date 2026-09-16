@@ -1,8 +1,8 @@
 # Verus Flake
 
 This repository packages [Verus](https://github.com/verus-lang/verus) as a
-Nix flake. It provides both a buildable package and a development shell using
-the Rust toolchain pinned by the upstream Verus source.
+Nix flake. It provides buildable Verus packages and a development shell for
+working in Verus projects.
 
 ## Outputs
 
@@ -19,18 +19,36 @@ nix build github:pgattic/verus-flake
 nix develop github:pgattic/verus-flake
 ```
 
-The installed package provides:
+The default package provides:
 
 - `verus`
 - `cargo-verus`
 
-Both wrappers set `VERUS_Z3_PATH` and disable runtime `rustup` use.
+The flake also packages `verus-analyzer`, whose binary is currently built as
+`rust-analyzer`.
+
+## Development Shell
+
+The default dev shell is intended for working inside a Verus project. It puts
+these tools on `PATH`:
+
+- `verus` and `cargo-verus`
+- `rust-analyzer` from the packaged `verus-analyzer`
+- The Rust toolchain pinned by upstream Verus, including `clippy`, `rust-src`,
+  `rustfmt`, `rustc-dev`, and `llvm-tools`
+- Cargo helpers: `cargo-audit`, `cargo-deny`, `cargo-edit`, `cargo-expand`,
+  `cargo-nextest`, and `cargo-watch`
+- Build support tools: `git`, `pkg-config`, `python3`, Z3, and OpenSSL
+
+The shell sets `VERUS_Z3_PATH`, `VARGO_TOOLCHAIN`, and `VERUS_USE_RUSTUP=0`.
 
 ## Inputs
 
 - `nixpkgs`: pinned from `nixos-unstable`
 - `rust-overlay`: provides the exact Rust toolchain requested by Verus
 - `verus-src`: the upstream Verus repository, used as a non-flake source
+- `verus-analyzer-src`: the upstream Verus analyzer repository, used as a
+  non-flake source
 
 The Rust channel is read directly from:
 

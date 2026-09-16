@@ -44,7 +44,7 @@
         toolchainTriple = "${toolchainVersion}-${pkgs.stdenv.hostPlatform.rust.rustcTargetSpec}";
 
         rustToolchain = pkgs.rust-bin.stable.${toolchainVersion}.minimal.override {
-          extensions = [ "rustfmt" "rustc-dev" "llvm-tools" ];
+          extensions = [ "clippy" "rust-src" "rustfmt" "rustc-dev" "llvm-tools" ];
         };
 
         rustPlatform = pkgs.makeRustPlatform {
@@ -86,13 +86,17 @@
           pkgs.z3
           pkgs.openssl
         ];
-      in
-      {
-        devShells.default = pkgs.mkShell ({
-          buildInputs = [ rustToolchain ] ++ commonBuildInputs ++ commonNativeBuildInputs;
-        } // commonEnv);
 
-        packages.default = rustPlatform.buildRustPackage ({
+        rustProjectTools = [
+          pkgs.cargo-audit
+          pkgs.cargo-deny
+          pkgs.cargo-edit
+          pkgs.cargo-expand
+          pkgs.cargo-nextest
+          pkgs.cargo-watch
+        ];
+
+        verusPackage = rustPlatform.buildRustPackage ({
           pname = "verus";
           version = "unstable-${verus-src.shortRev or verus-src.rev or "dirty"}";
           src = verus-src;
@@ -151,7 +155,8 @@
           doCheck = false;
           auditable = false;
         } // commonEnv);
-        packages.verus-analyzer = pkgs.rustPlatform.buildRustPackage {
+
+        verusAnalyzerPackage = pkgs.rustPlatform.buildRustPackage {
           pname = "verus-analyzer";
           version = "unstable-${verus-analyzer-src.shortRev or verus-analyzer-src.rev or "dirty"}";
           src = verus-analyzer-src;
@@ -186,6 +191,20 @@
 
           doCheck = false;
         };
+      in
+      {
+        devShells.default = pkgs.mkShell ({
+          packages = [
+            rustToolchain
+            verusPackage
+            verusAnalyzerPackage
+          ] ++ rustProjectTools ++ commonNativeBuildInputs;
+
+          buildInputs = commonBuildInputs;
+        } // commonEnv);
+
+        packages.default = verusPackage;
+        packages.verus-analyzer = verusAnalyzerPackage;
       };
     in
     {
