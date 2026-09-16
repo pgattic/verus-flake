@@ -8,9 +8,13 @@
       url = "github:verus-lang/verus";
       flake = false;
     };
+    verus-analyzer-src = {
+      url = "github:verus-lang/verus-analyzer";
+      flake = false;
+    };
   };
 
-  outputs = { self, nixpkgs, rust-overlay, verus-src }:
+  outputs = { self, nixpkgs, rust-overlay, verus-src, verus-analyzer-src }:
     let
       systems = [
         "aarch64-linux"
@@ -147,6 +151,41 @@
           doCheck = false;
           auditable = false;
         } // commonEnv);
+        packages.verus-analyzer = pkgs.rustPlatform.buildRustPackage {
+          pname = "verus-analyzer";
+          version = "unstable-${verus-analyzer-src.shortRev or verus-analyzer-src.rev or "dirty"}";
+          src = verus-analyzer-src;
+
+          cargoLock = {
+            lockFile = "${verus-analyzer-src}/Cargo.lock";
+            # Same story as core Verus's getopts dependency: fill in
+            # real hashes here if the build complains about missing
+            # hashes for git-sourced deps.
+            outputHashes = { };
+          };
+
+          nativeBuildInputs = [ pkgs.gitMinimal ];
+
+          # rust-analyzer's build.rs commonly embeds `git rev-parse
+          # HEAD` for its version string, same pattern that bit
+          # rust_verify's build.rs earlier -- pre-empting it here
+          # rather than waiting to hit the same panic again.
+          preBuild = ''
+            git init -q .
+            git config user.email "nix@build.local"
+            git config user.name "nix"
+            git add -A
+            git commit -q -m "nix build" --allow-empty
+          '';
+
+          # GUESS: assumes the fork kept the upstream binary name
+          # `rust-analyzer` rather than renaming it. Check
+          # verus-analyzer-src's Cargo.toml [[bin]] names if this
+          # flag doesn't match anything and adjust.
+          cargoBuildFlags = [ "--bin" "rust-analyzer" ];
+
+          doCheck = false;
+        };
       };
     in
     {

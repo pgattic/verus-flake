@@ -33,6 +33,7 @@
       "inputs": {
         "nixpkgs": "nixpkgs",
         "rust-overlay": "rust-overlay",
+        "verus-analyzer-src": "verus-analyzer-src",
         "verus-src": "verus-src"
       }
     },
@@ -51,6 +52,22 @@
       "original": {
         "owner": "oxalica",
         "repo": "rust-overlay",
+        "type": "github"
+      }
+    },
+    "verus-analyzer-src": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1789491159,
+        "narHash": "sha256-WjAnC2mIZ0kRGCDAyvaRj1r7nq5ATN83xqKtGddawvQ=",
+        "owner": "verus-lang",
+        "repo": "verus-analyzer",
+        "rev": "e5e5ee7e8e01147c2cc58c8d2ed4372f54b5d5bc",
+        "type": "github"
+      },
+      "original": {
+        "owner": "verus-lang",
+        "repo": "verus-analyzer",
         "type": "github"
       }
     },
